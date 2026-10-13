@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>功能性便秘患者抑郁症状筛查计算器</title>
+    <style>
+        :root { color-scheme: light; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft YaHei", sans-serif;
+            background: #f5f5f5;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        .header h1 {
+            font-size: 24px;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+        .header p {
+            font-size: 14px;
+            opacity: 0.95;
+        }
+        .content {
+            padding: 30px;
+        }
+        .section {
+            margin-bottom: 28px;
+        }
+        .section-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+        }
+        .section-title::before {
+            content: '';
+            display: inline-block;
+            width: 4px;
+            height: 16px;
+            background: #667eea;
+            margin-right: 8px;
+            border-radius: 2px;
+        }
+        .input-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            font-size: 14px;
+            color: #555;
+            margin-bottom: 6px;
+            font-weight: 500;
+        }
+        .range-label {
+            font-size: 12px;
+            color: #888;
+            margin-left: 4px;
+            font-weight: 400;
+        }
+        input[type="number"] {
+            width: 100%;
+            padding: 12px 16px;
+            font-size: 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            transition: all 0.2s;
+            font-family: inherit;
+        }
+        input[type="number"]:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        input[type="number"]:invalid {
+            border-color: #f44336;
+        }
+        .btn {
+            width: 100%;
+            padding: 14px;
+            font-size: 16px;
+            font-weight: 600;
+            color: white;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+        .btn:active {
+            transform: translateY(0);
+        }
+        .btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .result {
+            display: none;
+            margin-top: 24px;
+            padding: 20px;
+            border-radius: 8px;
+            border-left: 4px solid;
+        }
+        .result.show { display: block; }
+        .result.high-risk {
+            background: #fff3e0;
+            border-color: #ff9800;
+        }
+        .result.low-risk {
+            background: #e8f5e9;
+            border-color: #4caf50;
+        }
+        .result-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+        }
+        .result-title svg {
+            margin-right: 8px;
+        }
+        .result-content {
+            font-size: 14px;
+            color: #555;
+            line-height: 1.8;
+        }
+        .result-content strong {
+            color: #333;
+            font-weight: 600;
+        }
+        .result-detail {
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid rgba(0,0,0,0.1);
+            font-size: 13px;
+            color: #666;
+        }
+        .info-box {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 16px;
+            font-size: 13px;
+            color: #666;
+            line-height: 1.7;
+        }
+        .info-box strong {
+            color: #333;
+            display: block;
+            margin-bottom: 6px;
+        }
+        .footer {
+            padding: 20px 30px;
+            background: #f8f9fa;
+            border-top: 1px solid #e0e0e0;
+            font-size: 12px;
+            color: #888;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>功能性便秘患者抑郁症状筛查计算器</h1>
+            <p>基于PAC-SYM和PSQI评分的PHQ-9筛查需求预测</p>
+        </div>
+
+        <div class="content">
+            <div class="section">
+                <div class="section-title">输入评分</div>
+
+                <div class="input-group">
+                    <label for="pacsym">
+                        PAC-SYM总分
+                        <span class="range-label">(0-48分)</span>
+                    </label>
+                    <input type="number" id="pacsym" min="0" max="48" step="1" placeholder="请输入0-48之间的整数">
+                </div>
+
+                <div class="input-group">
+                    <label for="psqi">
+                        PSQI总分
+                        <span class="range-label">(0-21分)</span>
+                    </label>
+                    <input type="number" id="psqi" min="0" max="21" step="1" placeholder="请输入0-21之间的整数">
+                </div>
+
+                <button class="btn" onclick="calculate()">计算预测概率</button>
+            </div>
+
+            <div id="result" class="result">
+                <div class="result-title">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <path d="M12 16v-4M12 8h.01"></path>
+                    </svg>
+                    <span id="result-title-text"></span>
+                </div>
+                <div class="result-content" id="result-content"></div>
+                <div class="result-detail" id="result-detail"></div>
+            </div>
+
+            <div class="section">
+                <div class="section-title">使用说明</div>
+                <div class="info-box">
+                    <strong>模型方程：</strong>
+                    logit(p) = −6.6819 + 0.1465×PAC-SYM + 0.4694×PSQI
+                    <br><br>
+                    <strong>快速规则：</strong>
+                    PAC-SYM + 3.2×PSQI ≥ 36.5 时建议追加PHQ-9评估
+                    <br><br>
+                    <strong>性能指标（时间验证集）：</strong>
+                    AUROC 0.862，敏感度83.1%，特异度72.2%，阴性预测值93.5%
+                    <br><br>
+                    <strong>临床解释：</strong>
+                    预测概率≥0.209为高危，建议施测PHQ-9。采用此阈值可减少60%的PHQ-9施测量，同时检出83%的筛查阳性者。
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            本计算器基于单中心横断面研究开发（N=1080），仅用于研究参考，不能替代临床诊断。
+        </div>
+    </div>
+
+    <script>
+        function calculate() {
+            const pacsymInput = document.getElementById('pacsym');
+            const psqiInput = document.getElementById('psqi');
+            const resultDiv = document.getElementById('result');
+
+            const pacsym = parseFloat(pacsymInput.value);
+            const psqi = parseFloat(psqiInput.value);
+
+            // 验证输入
+            if (isNaN(pacsym) || isNaN(psqi)) {
+                alert('请输入有效的评分数值');
+                return;
+            }
+
+            if (pacsym < 0 || pacsym > 48) {
+                alert('PAC-SYM总分范围应为0-48分');
+                pacsymInput.focus();
+                return;
+            }
+
+            if (psqi < 0 || psqi > 21) {
+                alert('PSQI总分范围应为0-21分');
+                psqiInput.focus();
+                return;
+            }
+
+            // 计算预测概率
+            const logit = -6.6819 + 0.1465 * pacsym + 0.4694 * psqi;
+            const prob = 1 / (1 + Math.exp(-logit));
+            const probPercent = (prob * 100).toFixed(1);
+
+            // 快速规则判断
+            const weightedSum = pacsym + 3.2 * psqi;
+            const threshold = 36.5;
+            const isHighRisk = weightedSum >= threshold;
+
+            // 显示结果
+            resultDiv.classList.remove('high-risk', 'low-risk');
+            resultDiv.classList.add(isHighRisk ? 'high-risk' : 'low-risk');
+            resultDiv.classList.add('show');
+
+            const titleText = document.getElementById('result-title-text');
+            const content = document.getElementById('result-content');
+            const detail = document.getElementById('result-detail');
+
+            if (isHighRisk) {
+                titleText.textContent = '建议追加PHQ-9评估';
+                content.innerHTML = `
+                    <strong>预测概率：${probPercent}%</strong>（≥20.9%为高危）<br>
+                    加权和：${weightedSum.toFixed(1)}（≥36.5建议追加PHQ-9）<br><br>
+                    该患者的便秘症状负担和睡眠质量评分组合提示其具有较高的抑郁症状风险，建议追加PHQ-9评估以确认筛查阳性状态。
+                `;
+                detail.innerHTML = `
+                    <strong>临床参考：</strong>在时间验证集中，此阈值的敏感度为83.1%，特异度为72.2%。
+                    采用双评分模型分流可减少60%的PHQ-9施测量，同时保留83%的筛查阳性者。
+                `;
+            } else {
+                titleText.textContent = '暂不建议追加PHQ-9评估';
+                content.innerHTML = `
+                    <strong>预测概率：${probPercent}%</strong>（<20.9%为低危）<br>
+                    加权和：${weightedSum.toFixed(1)}（<36.5暂不建议追加PHQ-9）<br><br>
+                    该患者的便秘症状负担和睡眠质量评分组合提示其抑郁症状风险较低，暂不建议追加PHQ-9评估。
+                `;
+                detail.innerHTML = `
+                    <strong>临床参考：</strong>在时间验证集中，低危组的阴性预测值为93.5%，
+                    即该组中仅6.5%的患者为PHQ-9筛查阳性。若临床怀疑抑郁症状，仍可追加评估。
+                `;
+            }
+        }
+
+        // 回车键触发计算
+        document.getElementById('pacsym').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') calculate();
+        });
+        document.getElementById('psqi').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') calculate();
+        });
+    </script>
+</body>
+</html>
