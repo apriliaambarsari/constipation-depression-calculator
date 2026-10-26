@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>功能性便秘患者抑郁症状筛查计算器</title>
+    <title data-lang-en="Dual-Score Triage Calculator for Depressive Symptom Screening in Functional Constipation" data-lang-zh="功能性便秘患者抑郁症状筛查双评分分流计算器">Dual-Score Triage Calculator for Depressive Symptom Screening in Functional Constipation</title>
     <style>
         :root { color-scheme: light; }
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -12,6 +12,33 @@
             background: #f5f5f5;
             padding: 20px;
             line-height: 1.6;
+        }
+        .lang-switch {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            background: white;
+            border-radius: 20px;
+            padding: 6px 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            font-size: 14px;
+        }
+        .lang-switch button {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 4px 8px;
+            border-radius: 12px;
+            transition: all 0.2s;
+            font-weight: 500;
+        }
+        .lang-switch button.active {
+            background: #667eea;
+            color: white;
+        }
+        .lang-switch button:hover:not(.active) {
+            background: #f0f0f0;
         }
         .container {
             max-width: 800px;
@@ -182,33 +209,39 @@
     </style>
 </head>
 <body>
+    <div class="lang-switch">
+        <button onclick="switchLanguage('en')" id="btn-en" class="active">English</button>
+        <span>|</span>
+        <button onclick="switchLanguage('zh')" id="btn-zh">中文</button>
+    </div>
+
     <div class="container">
         <div class="header">
-            <h1>功能性便秘患者抑郁症状筛查计算器</h1>
-            <p>基于PAC-SYM和PSQI评分的PHQ-9筛查需求预测</p>
+            <h1 id="main-title">Dual-Score Triage Calculator for Depressive Symptom Screening in Functional Constipation</h1>
+            <p id="main-subtitle">PAC-SYM + PSQI Based Prediction for PHQ-9 Screening Needs</p>
         </div>
 
         <div class="content">
             <div class="section">
-                <div class="section-title">输入评分</div>
+                <div class="section-title" id="input-section-title">Input Scores</div>
 
                 <div class="input-group">
-                    <label for="pacsym">
-                        PAC-SYM总分
-                        <span class="range-label">(0-48分)</span>
+                    <label for="pacsym" id="label-pacsym">
+                        Patient Assessment of Constipation-Symptoms (PAC-SYM) total score
+                        <span class="range-label">(0-48)</span>
                     </label>
-                    <input type="number" id="pacsym" min="0" max="48" step="1" placeholder="请输入0-48之间的整数">
+                    <input type="number" id="pacsym" min="0" max="48" step="1" placeholder="Enter integer 0-48">
                 </div>
 
                 <div class="input-group">
-                    <label for="psqi">
-                        PSQI总分
-                        <span class="range-label">(0-21分)</span>
+                    <label for="psqi" id="label-psqi">
+                        Pittsburgh Sleep Quality Index (PSQI) total score
+                        <span class="range-label">(0-21)</span>
                     </label>
-                    <input type="number" id="psqi" min="0" max="21" step="1" placeholder="请输入0-21之间的整数">
+                    <input type="number" id="psqi" min="0" max="21" step="1" placeholder="Enter integer 0-21">
                 </div>
 
-                <button class="btn" onclick="calculate()">计算预测概率</button>
+                <button class="btn" onclick="calculate()" id="calc-btn">Calculate Predicted Probability</button>
             </div>
 
             <div id="result" class="result">
@@ -224,30 +257,134 @@
             </div>
 
             <div class="section">
-                <div class="section-title">使用说明</div>
-                <div class="info-box">
-                    <strong>模型方程：</strong>
-                    logit(p) = −6.6819 + 0.1465×PAC-SYM + 0.4694×PSQI
-                    <br><br>
-                    <strong>快速规则：</strong>
-                    PAC-SYM + 3.2×PSQI ≥ 36.5 时建议追加PHQ-9评估
-                    <br><br>
-                    <strong>性能指标（时间验证集）：</strong>
-                    AUROC 0.862，敏感度83.1%，特异度72.2%，阴性预测值93.5%
-                    <br><br>
-                    <strong>临床解释：</strong>
-                    预测概率≥0.209为高危，建议施测PHQ-9。采用此阈值可减少60%的PHQ-9施测量，同时检出83%的筛查阳性者。
+                <div class="section-title" id="info-section-title">Model Information</div>
+                <div class="info-box" id="info-box-content">
+                    <!-- Content will be filled by JavaScript based on language -->
                 </div>
             </div>
         </div>
 
-        <div class="footer">
-            本计算器基于单中心横断面研究开发（N=1080），仅用于研究参考，不能替代临床诊断。
+        <div class="footer" id="footer-text">
+            This calculator is based on a single-center temporal validation study (N=1080, development n=822, validation n=258) and is intended for research reference only. It does not replace clinical diagnosis.
         </div>
     </div>
 
     <script>
+        // Language content
+        const content = {
+            en: {
+                title: 'Dual-Score Triage Calculator for Depressive Symptom Screening in Functional Constipation',
+                subtitle: 'PAC-SYM + PSQI Based Prediction for PHQ-9 Screening Needs',
+                inputTitle: 'Input Scores',
+                labelPacsym: 'Patient Assessment of Constipation-Symptoms (PAC-SYM) total score',
+                labelPsqi: 'Pittsburgh Sleep Quality Index (PSQI) total score',
+                placeholderPacsym: 'Enter integer 0-48',
+                placeholderPsqi: 'Enter integer 0-21',
+                calcBtn: 'Calculate Predicted Probability',
+                infoTitle: 'Model Information',
+                infoContent: `<strong>Model Equation:</strong>
+                    logit(p) = −6.6819 + 0.1465×PAC-SYM + 0.4694×PSQI
+                    <br><br>
+                    <strong>Quick Rule:</strong>
+                    PAC-SYM + 3.2×PSQI ≥ 36.5 suggests second-stage PHQ-9 assessment
+                    <br><br>
+                    <strong>Performance Metrics (Temporal Validation, n = 258):</strong>
+                    AUROC 0.862, Sensitivity 83.1%, Specificity 72.9%, NPV 93.5%
+                    <br><br>
+                    <strong>Clinical Interpretation:</strong>
+                    A predicted probability ≥0.209 is classified as high-risk, prompting second-stage PHQ-9 administration. Adopting this threshold reduces PHQ-9 administrations by 60.1% while capturing 83.1% of positive screens.
+                    <br><br>
+                    <strong>Scope & Disclaimer:</strong>
+                    Intended for first-stage triage of previously unrecognized depressive symptoms (concurrent PHQ-9 ≥ 10) among outpatients meeting Rome IV criteria for functional constipation in clinics already assessing sleep. This tool is a triage alert rather than a clinical diagnosis of major depressive disorder, and is not intended for patients with known mental disorders or current antidepressant/psychological treatment.`,
+                footer: 'This calculator is based on a single-center temporal validation study (N=1080, development n=822, validation n=258) and is intended for research reference only. It does not replace clinical diagnosis.',
+                alertInvalid: 'Please enter valid score values',
+                alertPacsym: 'PAC-SYM total score should be between 0-48',
+                alertPsqi: 'PSQI total score should be between 0-21',
+                highRiskTitle: 'Second-stage assessment recommended',
+                highRiskContent: (prob, sum) => `<strong>Predicted probability: ${prob}%</strong> (≥20.9% indicates high risk)<br>
+                    Weighted sum: ${sum} (≥36.5 suggests second-stage PHQ-9)<br><br>
+                    The combination of constipation symptom burden and sleep quality scores suggests an elevated risk of depressive symptoms. Administering the full PHQ-9 or further psychological evaluation is recommended.`,
+                highRiskDetail: `<strong>Clinical reference:</strong> In temporal validation (n = 258), this threshold identified 83.1% of positive PHQ-9 screens with a specificity of 72.9%, PPV of 47.6%, and NPV of 93.5%, while reducing PHQ-9 administrations by 60.1%.`,
+                lowRiskTitle: 'Routine follow-up',
+                lowRiskContent: (prob, sum) => `<strong>Predicted probability: ${prob}%</strong> (<20.9% indicates low risk)<br>
+                    Weighted sum: ${sum} (<36.5, routine PHQ-9 not prompted)<br><br>
+                    The combination of constipation symptom burden and sleep quality scores suggests a lower risk of depressive symptoms. Routine second-stage PHQ-9 administration is not prompted by the model.`,
+                lowRiskDetail: `<strong>Clinical reference:</strong> In temporal validation, the low-risk group had a negative predictive value (NPV) of 93.5%, meaning only 6.5% of this group were positive PHQ-9 screens. Clinical judgment should always prevail if emotional symptoms are suspected.`
+            },
+            zh: {
+                title: '功能性便秘患者抑郁症状筛查双评分分流计算器',
+                subtitle: '基于 PAC-SYM 和 PSQI 评分的 PHQ-9 筛查需求预测',
+                inputTitle: '输入评分',
+                labelPacsym: 'PAC-SYM 总分（患者便秘症状评估量表）',
+                labelPsqi: 'PSQI 总分（匹兹堡睡眠质量指数）',
+                placeholderPacsym: '请输入 0-48 之间的整数',
+                placeholderPsqi: '请输入 0-21 之间的整数',
+                calcBtn: '计算预测概率',
+                infoTitle: '模型信息',
+                infoContent: `<strong>模型方程：</strong>
+                    logit(p) = −6.6819 + 0.1465×PAC-SYM + 0.4694×PSQI
+                    <br><br>
+                    <strong>快速规则：</strong>
+                    PAC-SYM + 3.2×PSQI ≥ 36.5 时建议追加 PHQ-9 评估
+                    <br><br>
+                    <strong>性能指标（时间验证集，n = 258）：</strong>
+                    AUROC 0.862，敏感度 83.1%，特异度 72.9%，阴性预测值 93.5%
+                    <br><br>
+                    <strong>临床解释：</strong>
+                    预测概率 ≥0.209 为高危，建议施测 PHQ-9。采用此阈值可减少 60.1% 的 PHQ-9 施测量，同时检出 83.1% 的筛查阳性者。
+                    <br><br>
+                    <strong>适用范围与免责说明：</strong>
+                    本工具定位于已开展睡眠评估的消化/便秘门诊，用于罗马 IV 功能性便秘就诊患者尚未识别的抑郁症状（同期 PHQ-9 ≥ 10）第一阶段分流预警。本模型结果不构成重性抑郁障碍的临床诊断，亦不适用于既往已确诊精神障碍或正在接受相关治疗者的症状评估。`,
+                footer: '本计算器基于单中心时间验证研究（N=1080，开发集 n=822，验证集 n=258），仅用于研究参考，不能替代临床诊断。',
+                alertInvalid: '请输入有效的评分数值',
+                alertPacsym: 'PAC-SYM 总分范围应为 0-48 分',
+                alertPsqi: 'PSQI 总分范围应为 0-21 分',
+                highRiskTitle: '建议进入第二阶段评估',
+                highRiskContent: (prob, sum) => `<strong>预测概率：${prob}%</strong>（≥20.9% 为高危）<br>
+                    加权和：${sum}（≥36.5 建议追加 PHQ-9）<br><br>
+                    该患者的便秘症状负担和睡眠质量评分组合提示其具有较高的抑郁症状风险，建议追加完整 PHQ-9 问卷或进一步心理评估。`,
+                highRiskDetail: `<strong>临床参考：</strong>在时间验证集（n = 258）中，该阈值可检出 83.1% 的 PHQ-9 筛查阳性者（特异度 72.9%，阳性预测值 47.6%，阴性预测值 93.5%），并减少 60.1% 的 PHQ-9 施测。`,
+                lowRiskTitle: '常规随访',
+                lowRiskContent: (prob, sum) => `<strong>预测概率：${prob}%</strong>（<20.9% 为低危）<br>
+                    加权和：${sum}（<36.5，暂不建议追加 PHQ-9）<br><br>
+                    该患者的便秘症状负担和睡眠质量评分组合提示其抑郁症状风险较低，模型不提示常规追加第二阶段 PHQ-9 施测。`,
+                lowRiskDetail: `<strong>临床参考：</strong>在时间验证集中，低危组的阴性预测值（NPV）为 93.5%，即该组中仅 6.5% 的患者为 PHQ-9 筛查阳性。若临床问诊中怀疑存在情绪问题，仍应结合临床判断处理。`
+            }
+        };
+
+        let currentLang = 'en';
+
+        function switchLanguage(lang) {
+            currentLang = lang;
+            document.getElementById('btn-en').classList.toggle('active', lang === 'en');
+            document.getElementById('btn-zh').classList.toggle('active', lang === 'zh');
+
+            const c = content[lang];
+            document.getElementById('main-title').textContent = c.title;
+            document.getElementById('main-subtitle').textContent = c.subtitle;
+            document.getElementById('input-section-title').textContent = c.inputTitle;
+            document.getElementById('label-pacsym').innerHTML = c.labelPacsym + ' <span class="range-label">(0-48)</span>';
+            document.getElementById('label-psqi').innerHTML = c.labelPsqi + ' <span class="range-label">(0-21)</span>';
+            document.getElementById('pacsym').placeholder = c.placeholderPacsym;
+            document.getElementById('psqi').placeholder = c.placeholderPsqi;
+            document.getElementById('calc-btn').textContent = c.calcBtn;
+            document.getElementById('info-section-title').textContent = c.infoTitle;
+            document.getElementById('info-box-content').innerHTML = c.infoContent;
+            document.getElementById('footer-text').textContent = c.footer;
+
+            // Re-calculate if result is showing
+            const resultDiv = document.getElementById('result');
+            if (resultDiv.classList.contains('show')) {
+                calculate();
+            }
+        }
+
         function calculate() {
+            // CRITICAL: Use full precision threshold 0.208735 for risk determination
+            const THRESHOLD_FULL_PRECISION = 0.208735;
+            const THRESHOLD_DISPLAY = 0.209;
+
+            const c = content[currentLang];
             const pacsymInput = document.getElementById('pacsym');
             const psqiInput = document.getElementById('psqi');
             const resultDiv = document.getElementById('result');
@@ -255,75 +392,70 @@
             const pacsym = parseFloat(pacsymInput.value);
             const psqi = parseFloat(psqiInput.value);
 
-            // 验证输入
+            // Validation
             if (isNaN(pacsym) || isNaN(psqi)) {
-                alert('请输入有效的评分数值');
+                alert(c.alertInvalid);
                 return;
             }
 
             if (pacsym < 0 || pacsym > 48) {
-                alert('PAC-SYM总分范围应为0-48分');
+                alert(c.alertPacsym);
                 pacsymInput.focus();
                 return;
             }
 
             if (psqi < 0 || psqi > 21) {
-                alert('PSQI总分范围应为0-21分');
+                alert(c.alertPsqi);
                 psqiInput.focus();
                 return;
             }
 
-            // 计算预测概率
+            // Calculate predicted probability
             const logit = -6.6819 + 0.1465 * pacsym + 0.4694 * psqi;
             const prob = 1 / (1 + Math.exp(-logit));
             const probPercent = (prob * 100).toFixed(1);
 
-            // 快速规则判断
+            // Weighted sum for quick rule
             const weightedSum = pacsym + 3.2 * psqi;
-            const threshold = 36.5;
-            const isHighRisk = weightedSum >= threshold;
 
-            // 显示结果
+            // CRITICAL: Use UNROUNDED probability with full precision threshold
+            const isHighRisk = prob >= THRESHOLD_FULL_PRECISION;
+
+            // Boundary test cases (for verification):
+            // PSQI=2, PAC-SYM=30 → prob≈0.2062, sum=36.4 → LOW RISK ✓
+            // PSQI=7, PAC-SYM=14 → prob≈0.2067, sum=36.4 → LOW RISK ✓
+            // PSQI=8, PAC-SYM=20 → prob≈0.50, sum=45.6 → HIGH RISK ✓
+
+            // Display result
             resultDiv.classList.remove('high-risk', 'low-risk');
             resultDiv.classList.add(isHighRisk ? 'high-risk' : 'low-risk');
             resultDiv.classList.add('show');
 
             const titleText = document.getElementById('result-title-text');
-            const content = document.getElementById('result-content');
+            const contentEl = document.getElementById('result-content');
             const detail = document.getElementById('result-detail');
 
             if (isHighRisk) {
-                titleText.textContent = '建议追加PHQ-9评估';
-                content.innerHTML = `
-                    <strong>预测概率：${probPercent}%</strong>（≥20.9%为高危）<br>
-                    加权和：${weightedSum.toFixed(1)}（≥36.5建议追加PHQ-9）<br><br>
-                    该患者的便秘症状负担和睡眠质量评分组合提示其具有较高的抑郁症状风险，建议追加PHQ-9评估以确认筛查阳性状态。
-                `;
-                detail.innerHTML = `
-                    <strong>临床参考：</strong>在时间验证集中，此阈值的敏感度为83.1%，特异度为72.2%。
-                    采用双评分模型分流可减少60%的PHQ-9施测量，同时保留83%的筛查阳性者。
-                `;
+                titleText.textContent = c.highRiskTitle;
+                contentEl.innerHTML = c.highRiskContent(probPercent, weightedSum.toFixed(1));
+                detail.innerHTML = c.highRiskDetail;
             } else {
-                titleText.textContent = '暂不建议追加PHQ-9评估';
-                content.innerHTML = `
-                    <strong>预测概率：${probPercent}%</strong>（<20.9%为低危）<br>
-                    加权和：${weightedSum.toFixed(1)}（<36.5暂不建议追加PHQ-9）<br><br>
-                    该患者的便秘症状负担和睡眠质量评分组合提示其抑郁症状风险较低，暂不建议追加PHQ-9评估。
-                `;
-                detail.innerHTML = `
-                    <strong>临床参考：</strong>在时间验证集中，低危组的阴性预测值为93.5%，
-                    即该组中仅6.5%的患者为PHQ-9筛查阳性。若临床怀疑抑郁症状，仍可追加评估。
-                `;
+                titleText.textContent = c.lowRiskTitle;
+                contentEl.innerHTML = c.lowRiskContent(probPercent, weightedSum.toFixed(1));
+                detail.innerHTML = c.lowRiskDetail;
             }
         }
 
-        // 回车键触发计算
+        // Enter key triggers calculation
         document.getElementById('pacsym').addEventListener('keypress', function(e) {
             if (e.key === 'Enter') calculate();
         });
         document.getElementById('psqi').addEventListener('keypress', function(e) {
             if (e.key === 'Enter') calculate();
         });
+
+        // Initialize with English
+        switchLanguage('en');
     </script>
 </body>
 </html>
